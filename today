@@ -1,0 +1,125 @@
+#!/bin/bash
+
+BLACK='\e[0;30m'
+RED='\e[0;31m'
+GREEN='\e[0;32m'
+BROWN='\e[0;33m'
+BLUE='\e[0;34m'
+PURPLE='\e[0;35m'
+CYAN='\e[0;36m'
+LIGHT_GREY='\e[0;37m'
+DARK_GREY='\e[1;30m'
+LIGHT_RED='\e[1;31m'
+LIGHT_GREEN='\e[1;32m'
+YELLOW='\e[1;33m'
+LIGHT_BLUE='\e[1;34m'
+LIGHT_PURPLE='\e[1;35m'
+LIGHT_CYAN='\e[1;36m'
+WHITE='\e[1;37m'
+DEFAULT='\e[0m'
+
+## === HIGH-COLOR === compatible with most terms including putty
+### for windows... use colors that don't make your eyes bleed :)
+PINK='\e[38;5;211m'
+ORANGE='\e[38;5;203m'
+SKYBLUE='\e[38;5;111m'
+MEDIUMGREY='\e[38;5;246m'
+LAVENDER='\e[38;5;183m'
+TAN='\e[38;5;179m'
+FOREST='\e[38;5;22m'
+MAROON='\e[38;5;52m'
+HOTPINK='\e[38;5;198m'
+MINTGREEN='\e[38;5;121m'
+LIGHTORANGE='\e[38;5;215m'
+LIGHTRED='\e[38;5;203m'
+JADE='\e[38;5;35m'
+LIME='\e[38;5;154m'
+### background colors
+PINK_BG='\e[48;5;211m'
+ORANGE_BG='\e[48;5;203m'
+SKYBLUE_BG='\e[48;5;111m'
+MEDIUMGREY_BG='\e[48;5;246m'
+LAVENDER_BG='\e[48;5;183m'
+TAN_BG='\e[48;5;179m'
+FOREST_BG='\e[48;5;22m'
+MAROON_BG='\e[48;5;52m'
+HOTPINK_BG='\e[48;5;198m'
+MINTGREEN_BG='\e[48;5;121m'
+LIGHTORANGE_BG='\e[48;5;215m'
+LIGHTRED_BG='\e[48;5;203m'
+JADE_BG='\e[48;5;35m'
+LIME_BG='\e[48;5;154m'
+### extra attributes
+UNDERLINE='\e[4m'
+
+clear
+
+FULLDATE=$(date -d today '+%A, %B %e, %Y')
+DAY_OF_WEEK=$(date +%a)
+TODAY=$(date -d today +%F)
+
+echo -e "$WHITE $UNDERLINE $FULLDATE $DEFAULT"
+cal -3
+
+if [ ${DAY_OF_WEEK} == 'Fri' ];
+then
+	PREVIEW_DAYS='+3days'
+	echo "Happy Friday!"
+    CAL_DATE="$(date -d today +%F)T00:00 $(date -d +3days +%F)T23:59"
+else
+	PREVIEW_DAYS='today'
+    CAL_DATE="$(date -d today +%F)T00:00 $(date -d today +%F)T23:59"
+fi
+
+PAST=$($HOME/bin/todo.sh -x view past | sed '/=====  Dates  =====/d')
+
+if [ -n "$PAST" ]; then
+    echo -e "$LIGHT_RED $UNDERLINE Past Due Tasks $DEFAULT"
+    echo -e "$PAST"
+fi
+
+if [ ${DAY_OF_WEEK} == 'Fri' ];
+then
+    TODAY=$(todo.sh view today | sed '/=====  Dates  =====/d')
+    WEEKEND=$(todo.sh view ${PREVIEW_DAYS} | sed '/=====  Dates  =====/d')
+    
+    if [[ -z "$TODAY" && -z "$WEEKEND" ]]; then
+        echo -e "$YELLOW No tasks until next week! Have a great weekend! $DEFAULT"
+    else
+        echo -e "$WHITE $UNDERLINE Tasks for Today and the Weekend $DEFAULT"
+        #echo -e "$TODAY"
+        echo -e "$WEEKEND"
+    fi
+else
+    TODAY=$(todo.sh view ${PREVIEW_DAYS} | sed '/=====  Dates  =====/d' | sed "/---  `date -d today +%F`  ---/d")
+	
+    if [ -n "$TODAY" ]; then
+        echo -e "$WHITE $UNDERLINE Today's Tasks $DEFAULT"
+        echo -e "$TODAY"
+    else
+        UPCOMING="$($HOME/bin/todo.sh -x view +7days | sed '/=====  Dates  =====/d')"
+        if [ -n "$UPCOMING" ]; then
+            echo -e "$LIGHT_GREEN $UNDERLINE Upcoming Tasks $DEFAULT"
+            echo -e "$UPCOMING"
+        fi
+    fi
+fi
+
+UNDATED=$($HOME/bin/todo.sh -x view nodate | sed '/=====  Dates  =====/d' | sed '/---  Items without date  ---/d')
+
+if [ -n "$UNDATED" ]; then
+    echo -e "$LIGHT_BLUE $UNDERLINE Tasks without due dates $DEFAULT"
+    echo -e "$UNDATED"
+fi
+echo
+if [ ${DAY_OF_WEEK} == 'Fri' ];
+then
+    echo -e "$ORANGE $UNDERLINE Calendar Items for $FULLDATE and the weekend $DEFAULT"
+else
+    echo -e "$ORANGE $UNDERLINE Calendar Items for $FULLDATE $DEFAULT"
+fi
+
+gcalcli agenda $CAL_DATE --calendar Paul --calendar "Episcopal Liturgical Calendar" --calendar Birthdays --calendar Linda --calendar "WA7BNM Contest Calendar"
+
+$HOME/go/bin/wego 1 | tail -n+8
+
