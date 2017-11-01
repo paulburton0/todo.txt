@@ -9,6 +9,7 @@ param="$*"
 pattern=" t:\([0-9]\{2,4\}[^A-Za-z0-9]\)\{2\}[0-9]\{2,4\}" # not enforcing any particular format
 
 function usage {
+    echo ""
 	echo "  $(basename $0) [<item> <date>|<item> mv <date>|<item> rm]"
 	echo "    Set, modify or remove date threshold of an item."
 	echo "    If arguments are omitted, all scheduled tasks are listed."
