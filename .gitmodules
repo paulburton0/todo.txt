@@ -1,0 +1,3 @@
+[submodule "todo.actions.d/hide"]
+	path = todo.actions.d/hide
+	url = https://github.com/bozakov/todo.txt-hide.git
